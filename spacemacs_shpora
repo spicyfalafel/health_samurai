@@ -1,0 +1,6 @@
+ctrl  c + ctrl z = show repl window
+https://github.com/middlesphere/spacemacs-clojure-cheatsheet/blob/master/spacemacs-shortcuts.txt
+ysiw) = wrap into parens 
+
+https://steinbaugh.com/posts/spacemacs.html
+https://github.com/emacs-evil/evil-surround
