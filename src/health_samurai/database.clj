@@ -67,17 +67,24 @@
   (jdbc/query pg-db (sql/format {:select [:*]
                                  :from [:patient]})))
 
+(defn del-patient! [id]
+  (jdbc/delete! pg-db :patient ["id = ?" id]))
+
+
+(defn replace-birthdate-str [patient]
+  (if-let [birthdate-str (:birthdate patient)]
+    (assoc patient :birthdate (parse-date birthdate-str))
+    patient))
+
+(defn upd-patient! [patient]
+  ;; если в параметре есть birthdate, значит надо его поменять на объект даты
+  ;; если нет, значит менять не надо
+  (jdbc/update! pg-db :patient (replace-birthdate-str patient)
+                ["id = ?" (:id patient)]))
+
 (defn ins-patient! [patient]
-  (jdbc/insert! pg-db :patient patient))
-
-(defn upd-patient!
-  ([id parts]
-   (jdbc/update! pg-db :patient parts ["id = ?" id]))
-  ([patient]
-   (jdbc/update! pg-db :patient patient ["id = ?" (:id patient)])))
-
-(defn del-patient [id]
-  (jdbc/delete! db :patient ["id = ?" id]))
+  (let [pat (assoc patient :birthdate  (parse-date (:birthdate patient)))]
+   (jdbc/insert! pg-db :patient pat)))
 
 (comment
   (def pat {:firstname "a"
@@ -85,7 +92,7 @@
             :gender_id 1
             :birthdate #time/ld "2000-01-01"
             :address "ffsfff"
-            :polys_id 4444444444444444})
+            :polys_id 4444414444444444})
 
 
   (ins-patient! pat)
@@ -94,6 +101,10 @@
 
   (upd-patient! (assoc pat :id 13)) ;; ok
 
+  (upd-patient! 100 {:lastname "C"})
+
   (get-patients)
+
+  (del-patient 13)
 
   )

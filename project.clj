@@ -8,6 +8,7 @@
                  [org.immutant/web          "2.1.10"]
                  [rum                       "0.12.8"]
                  [org.clojure/clojurescript "1.11.4" :scope "provided"]
+                 [ring/ring-json "0.5.1"]
                  ;[org.clojure/data.json "2.4.0"]
                  [cheshire "5.10.2"]
                  [ring-cors "0.1.13"]

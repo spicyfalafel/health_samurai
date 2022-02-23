@@ -6,6 +6,10 @@
    ;[clojure.data.json :as json]
    [cheshire.core :refer :all]
    [ring.middleware.cors :refer [wrap-cors]]
+   [ring.middleware.params :refer [wrap-params]]
+   [ring.middleware.keyword-params :refer [wrap-keyword-params]]
+   [ring.middleware.json :refer [wrap-json-response wrap-json-body]]
+   [ring.util.response :only [response]]
    [health-samurai.database :as db]))
 
 ;; GET /patient
@@ -25,25 +29,49 @@
               (generate-string (db/get-patients) {:pretty true}))
 
 (defn add-patient [request]
-  (when-let [patient-map (:params request)]
+  (let [patient (:body request)]
+    (if-let [ans-map (db/ins-patient! patient)]
+      {
+       :status 201
+       :body ans-map}
+      {:status 400
+       :body "something went wrong"}
+      )))
+
+
+(defn update-patient [request]
+  (let [patient (:body request)
+        id (:id :params request)] ;; todo use /patient/:id
+    (if-let [ans-map (db/upd-patient! patient)]
+      {
+       :status 200
+       :body ans-map}
+      {:status 204
+       :body "not found"}
+      )))
+
+(defn delete-patient [request]
+  (if-let [del-ans (db/del-patient! (Integer/parseInt (-> request :params :id)))]
     {
      :status 200
-     :body (doall
-            ;(db/ins-patient! patient-map)
-            (str patient-map))
-     })
-  )
-
+     :body del-ans}
+    {
+     :status 404
+     :body "not found"}))
 
 (compojure/defroutes routes
   (compojure/GET "/patient" [] {:body (get-patients)})
   (compojure/POST "/patient" request (add-patient request))
-  (compojure/PUT "/patient/:id" [id] {:body (str "PUT patient with id " id) })
-  (compojure/DELETE "/patient/:id" [id] {:body (str "DELETE patient with id " id )})
+  (compojure/PUT "/patient/:id" [id :as request] (update-patient request))
+  (compojure/DELETE "/patient/:id" [id :as request] (delete-patient request)),
   (cjr/not-found "<h1>Page not found!!!</h1>"))
 
 
 (def app (-> routes
+             wrap-json-response
+             (wrap-json-body {:keywords? true :bigdecimals? true})
+             wrap-params
+             wrap-keyword-params
              (wrap-cors :access-control-allow-origin [#"http://localhost:8000"] ;; CORS
                         :access-control-allow-methods [:get :post]
                         :access-control-allow-headers ["Origin" "X-Requested-With" "Content-Type" "Accept"]
@@ -62,4 +90,6 @@
   (def server (-main "--port" "8080"))
 
 
-  (web/stop server))
+  (web/stop server)
+
+  )
