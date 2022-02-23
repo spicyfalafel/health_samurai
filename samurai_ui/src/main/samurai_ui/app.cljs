@@ -6,31 +6,27 @@
   (:require [cljs.core.async :refer [<!]] [cljs-http.client :as http])
   )
 
-(def t (r/atom nil))
-
-(defn get-request []
-  (go (<! (http/get "http://localhost:8080/patient"
-                    {:with-credentials? false
-                     :Origin "http://localhost:8000"} ;; CORS
-                    ))))
-
-(defn read-response [channel]
-  (go (let [resp (<! channel)]
-        (reset! t (:body resp)))))
-
-;(print (reset! t {:a "a"}))
-
-(read-response (get-request))
-
 
 (defn init []
-  (println "app initialized"))
+  (println "app initialized")
+  (myreq/get-patients))
 
 
 (defn Application []
-  [:div
-   [:h1 "App works"]
-   @t
+  [:div.my-container
+   [:h1.app-name "Patients"]
+   [:button.add-patient-btn {:onClick (fn [] (myreq/get-patients))} "Add patient"]
+
+   (doall
+    (for [p @myreq/patients-atom]
+      [:div.card
+       [:h2 "Name: " (:firstname p) " "(:lastname p)]
+       [:h2 "Gender: " (:gender p)]
+       [:h2 "Birthdate: " (:birthdate p)]
+       [:h2 "Address: " (:address p)]
+       [:h2 "Polys: " (:polys_id p)]
+       [:button {:onClick (fn [] (myreq/get-patients))} "Remove patient"]]
+      ))
    ])
 
 (dom/render [Application] (js/document.getElementById "app"))

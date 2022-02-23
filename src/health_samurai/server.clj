@@ -12,11 +12,6 @@
    [ring.util.response :only [response]]
    [health-samurai.database :as db]))
 
-;; GET /patient
-;; POST /patient
-;; PUT /patient/{id}
-;; DELETE /patient/{id}
-
 
 ;; LocalDate json encoding
 (extend-protocol cheshire.generate/JSONable

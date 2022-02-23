@@ -1,11 +1,27 @@
 (ns samurai-ui.requests
+  (:require [reagent.core :as r])
+  (:require [samurai-ui.json-util :as my-json])
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [cljs.core.async :refer [<!]] [cljs-http.client :as http]))
 
-(defn my-get []
-  (go (let [response (<! (http/get "http://localhost:8080/patient"
-                                   {:with-credentials? false
-                                    :Origin "http://localhost:8000"}))]
-        (:body response))))
+(def backend-url "http://localhost:8080")
+(def patients-endp "/patient")
 
+(def patients-atom (r/atom nil))
+
+
+(defn get-request [endpoint]
+  (go (<! (http/get (str backend-url endpoint)
+                    {:with-credentials? false
+                     :Origin "http://localhost:8000"} ;; CORS
+                    ))))
+
+
+(defn read-response [channel]
+  (go (let [resp (<! channel)]
+        (reset! patients-atom (my-json/parse-string (:body resp))))))
+
+(defn get-patients []
+  (-> (get-request patients-endp)
+      read-response))
 

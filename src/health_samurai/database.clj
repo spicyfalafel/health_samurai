@@ -64,8 +64,14 @@
 
 
 (defn get-patients []
-  (jdbc/query pg-db (sql/format {:select [:*]
-                                 :from [:patient]})))
+  (jdbc/query pg-db (sql/format {:select [:patient.firstname
+                                          :patient.lastname
+                                          [:gender.name "gender"]
+                                          :patient.birthdate
+                                          :patient.address
+                                          :patient.polys_id]
+                                 :from [:patient]
+                                 :join [:gender [:= :gender.id :patient.gender_id]] })))
 
 (defn del-patient! [id]
   (jdbc/delete! pg-db :patient ["id = ?" id]))
