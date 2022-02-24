@@ -6,12 +6,12 @@
    ;;[honeysql.format :as sqlf]
    [honey.sql.helpers :refer :all :as h]
    [java-time :as time])
-   (:import [java.sql Timestamp]
-            [java.sql Date]
-            [java.time.format DateTimeFormatter]
-            [java.time LocalDate]
-            [java.time Instant]
-            [java.io FileWriter]))
+  (:import [java.sql Timestamp]
+           [java.sql Date]
+           [java.time.format DateTimeFormatter]
+           [java.time LocalDate]
+           [java.time Instant]
+           [java.io FileWriter]))
 
 
 (def pg-db {:dbtype "postgresql"
@@ -40,11 +40,11 @@
 
 (defmethod print-method java.time.Instant
   [inst out]
-  (.write out (str "#time/inst \"" (.toString inst) "\"") ))
+  (.write out (str "#time/inst \"" (.toString inst) "\"")))
 
 (defmethod print-dup java.time.Instant
   [inst out]
-  (.write out (str "#time/inst \"" (.toString inst) "\"") ))
+  (.write out (str "#time/inst \"" (.toString inst) "\"")))
 
 (defmethod print-method LocalDate
   [^LocalDate date ^FileWriter out]
@@ -71,7 +71,7 @@
                                           :patient.address
                                           :patient.polys_id]
                                  :from [:patient]
-                                 :join [:gender [:= :gender.id :patient.gender_id]] })))
+                                 :join [:gender [:= :gender.id :patient.gender_id]]})))
 
 (defn del-patient! [id]
   (jdbc/delete! pg-db :patient ["id = ?" id]))
@@ -102,15 +102,5 @@
 
 
   (ins-patient! pat)
-
-  (upd-patient! 13 {:lastname "C"}) ;; ok
-
   (upd-patient! (assoc pat :id 13)) ;; ok
-
-  (upd-patient! 100 {:lastname "C"})
-
-  (get-patients)
-
-  (del-patient 13)
-
-  )
+  (get-patients))

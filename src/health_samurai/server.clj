@@ -4,7 +4,8 @@
    [compojure.route :as cjr]
    [compojure.core :as compojure]
    ;[clojure.data.json :as json]
-   [cheshire.core :refer :all]
+   [cheshire.core :refer [generate-string]]
+   [cheshire.generate :refer [JSONable]]
    [ring.middleware.cors :refer [wrap-cors]]
    [ring.middleware.params :refer [wrap-params]]
    [ring.middleware.keyword-params :refer [wrap-keyword-params]]
@@ -14,11 +15,12 @@
 
 
 ;; LocalDate json encoding
-(extend-protocol cheshire.generate/JSONable
+(extend-protocol JSONable
   java.time.LocalDate
   (to-json [dt gen]
     (cheshire.generate/write-string gen (str dt))))
 
+(+ 1 2)
 
 (defn get-patients []
               (generate-string (db/get-patients) {:pretty true}))
@@ -30,8 +32,8 @@
        :status 201
        :body ans-map}
       {:status 400
-       :body "something went wrong"}
-      )))
+       :body "something went wrong"})))
+
 
 
 (defn update-patient [request]
@@ -42,8 +44,8 @@
        :status 200
        :body ans-map}
       {:status 204
-       :body "not found"}
-      )))
+       :body "not found"})))
+
 
 (defn delete-patient [request]
   (if-let [del-ans (db/del-patient! (Integer/parseInt (-> request :params :id)))]
@@ -69,8 +71,8 @@
              wrap-keyword-params
              (wrap-cors :access-control-allow-origin [#"http://localhost:8000"] ;; CORS
                         :access-control-allow-methods [:get :post]
-                        :access-control-allow-headers ["Origin" "X-Requested-With" "Content-Type" "Accept"]
-             )))
+                        :access-control-allow-headers ["Origin" "X-Requested-With" "Content-Type" "Accept"])))
+
 
 (defn -main [& args]
   (let [args-map (apply array-map args)
@@ -78,13 +80,11 @@
                      (get args-map "--port")
                      "8080")]
     (println "Starting web server on port" port-str)
-    (web/run #'app { :port (Integer/parseInt port-str) })))
+    (web/run #'app { :port (Integer/parseInt port-str)})))
 
 
 (comment
   (def server (-main "--port" "8080"))
 
 
-  (web/stop server)
-
-  )
+  (web/stop server))
