@@ -19,15 +19,5 @@
    :output-dir "public/app/js"
    :asset-path "/app/js"
    :modules {:main
-             {:init-fn samurai-ui.app/init}}
-   }
-
-  :bootstrap-support
-  {:target :bootstrap
-   :output-dir "public/bootstrap"
-   :exclude #{cljs.js}
-   :entries [cljs.js reagent.core]
-   :macros []}
-  }
- }
-
+             {:init-fn samurai-ui.app/init}}}}}
+   
